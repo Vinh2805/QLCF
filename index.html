@@ -1,0 +1,428 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>ManagementCoffee</title>
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+
+    <!-- Favicons -->
+    <link href="../assets/img/favicon.png" rel="icon">
+    <link href="../assets/img/apple-touch-icon.png" rel="apple-touch-icon">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com" rel="preconnect">
+    <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+
+    <!-- Vendor CSS Files -->
+    <link href="../assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+    <link href="../assets/vendor/aos/aos.css" rel="stylesheet">
+    <link href="../assets/vendor/glightbox/css/glightbox.min.css" rel="stylesheet">
+    <link href="../assets/vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
+
+    <!-- Main CSS File -->
+    <link href="../assets/css/main.css" rel="stylesheet">
+
+    <!-- Swiper CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+<!-- Swiper JS -->
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+
+   
+</head>
+
+<body class="index-page">
+
+    <header id="header" class="header fixed-top">
+
+        <div class="branding d-flex align-items-center">
+
+            <div class="container position-relative d-flex align-items-center justify-content-between">
+                <a href="login.html" class="btn btn-outline-light me-3 d-none d-xl-block">Đăng nhập với tư cách admin</a>
+
+                <a href="index.html" class="logo d-flex align-items-center me-auto me-xl-0">
+                    <!-- Uncomment the line below if you also wish to use an image logo -->
+                    <!-- <img src="../assets/img/logo.png" alt=""> -->
+                    <h1 class="sitename">CoffeeShop</h1>
+                </a>
+
+                <nav id="navmenu" class="navmenu">
+                    <ul>
+                        <li><a href="#hero" class="active">Home<br></a></li>
+                        <li><a href="#menu">Menu</a></li>
+                        <li><a href="#km-list">Promotional events</a></li>
+                        <li><a href="#contact">Contact</a></li>
+                    </ul>
+                    <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
+                </nav>
+
+                <a class="btn-book-a-table d-none d-xl-block" href="#book-a-table">Book a Table</a>
+
+            </div>
+
+        </div>
+
+    </header>
+
+    <main class="main">
+
+        <!-- Hero Section -->
+        <section id="hero" class="hero section dark-background">
+
+            <img src="../assets/img/hero-bg.jpg" alt="" data-aos="fade-in">
+
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-8 d-flex flex-column align-items-center align-items-lg-start">
+                        <h2 data-aos="fade-up" data-aos-delay="100">Welcome to <span>CoffeeShop</span></h2>
+                        <p data-aos="fade-up" data-aos-delay="200">Delivering great food for more than 18 years!</p>
+                        <div class="d-flex mt-4" data-aos="fade-up" data-aos-delay="300">
+                            <a href="#menu" class="cta-btn">Our Menu</a>
+                            <a href="#book-a-table" class="cta-btn">Book a Table</a>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+
+        </section><!-- /Hero Section -->
+        <!-- Menu Section with API -->
+        <style>
+          .menu-item {
+            border-radius: 16px;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+            background-color: #fff;
+          }
+        
+          .menu-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+          }
+        
+          .menu-item img {
+            height: 220px;
+            object-fit: cover;
+          }
+        
+          .menu-item .card-body {
+            padding: 1rem;
+          }
+        
+          .menu-item h5 {
+            font-weight: 600;
+            color: #4e342e; /* coffee tone */
+          }
+        
+          .menu-item .card-text {
+            font-size: 0.95rem;
+            color: #6c757d;
+          }
+        
+          .menu-item .fw-bold {
+            color: #795548;
+          }
+        </style>
+        
+  <section id="menu" class="menu section">
+    <div class="container section-title" data-aos="fade-up">
+      <h2>Menu</h2>
+      <p>Thực Đơn Cà Phê</p>
+    </div>
+
+    <div class="container">
+      <div class="row" id="menu-container"></div>
+    </div>
+  </section>
+
+  <!-- Script to fetch API -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+  fetch("http://localhost:5000/api/thucdon")
+    .then(res => res.json())
+    .then(data => {
+      const container = document.getElementById("menu-container");
+      container.innerHTML = "";
+      data.forEach(item => {
+        const col = document.createElement("div");
+        col.className = "col-lg-4 col-md-6 mb-4 d-flex align-items-stretch";
+        col.innerHTML = `
+          <div class="menu-item card shadow">
+            <img src="assets/imageAnhDaiDienQuanLiCF/${item.AnhDaiDien}" class="card-img-top img-fluid" alt="${item.tenMon}">
+            <div class="card-body d-flex flex-column">
+              <h5 class="card-title text-center">${item.tenMon}</h5>
+              <p class="card-text">${item.GioiThieuMon || 'Không có mô tả.'}</p>
+              <div class="mt-auto text-center">
+                <p class="fw-bold">Giá: ${item.giaBan.toLocaleString()} VNĐ</p>
+              </div>
+            </div>
+          </div>
+        `;
+        container.appendChild(col);
+      });
+    })
+    .catch(err => {
+      console.error("Lỗi khi lấy dữ liệu:", err);
+      document.getElementById("menu-container").innerHTML = '<p class="text-danger">Không thể tải thực đơn.</p>';
+    });
+
+  // Khuyến mãi 
+  fetch("http://localhost:5000/api/khuyenmai")
+  .then(res => res.json())
+  .then(data => {
+    const wrapper = document.getElementById("km-list");
+    wrapper.innerHTML = "";
+    data.forEach(km => {
+      const slide = document.createElement("div");
+      slide.className = "swiper-slide";
+      slide.innerHTML = `
+        <div class="card shadow-sm h-100">
+          <div class="card-body">
+            <h5 class="card-title text-primary">${km.tenKhuyenMai}</h5>
+            <p class="card-text">${km.moTa}</p>
+            <p><strong>Áp dụng:</strong> ${km.ngayBatDau} đến ${km.ngayKetThuc}</p>
+          </div>
+        </div>
+      `;
+      wrapper.appendChild(slide);
+    });
+
+    // Khởi tạo swiper sau khi DOM đã có slide
+    new Swiper(".km-swiper", {
+      slidesPerView: 1,
+      spaceBetween: 20,
+      loop: true,
+      grabCursor: true,
+      pagination: {
+        el: ".swiper-pagination",
+        clickable: true,
+      },
+      navigation: {
+        nextEl: ".swiper-button-next",
+        prevEl: ".swiper-button-prev",
+      },
+      breakpoints: {
+        768: {
+          slidesPerView: 2,
+        },
+        992: {
+          slidesPerView: 3,
+        },
+      },
+    });
+  })
+  .catch(err => {
+    document.getElementById("km-list").innerHTML =
+      "<p class='text-danger'>Không thể tải khuyến mãi.</p>";
+    console.error(err);
+  });
+
+});
+
+    </script>
+    
+    
+       
+        <!-- Events Section -->
+        <style>
+          .swiper-slide {
+            height: auto;
+          }
+          .km-swiper .card {
+            border-radius: 16px;
+            transition: transform 0.3s;
+          }
+          .km-swiper .card:hover {
+            transform: translateY(-5px);
+          }
+        </style>
+        
+        <section id="events" class="events section bg-light py-5">
+          <div class="container" data-aos="fade-up">
+            <h2 class="mb-4 text-center">🎉 Khuyến mãi hiện tại</h2>
+            <div class="swiper km-swiper">
+              <div class="swiper-wrapper" id="km-list">
+                <!-- Các slide sẽ được thêm bằng JS -->
+              </div>
+              <!-- Navigation buttons -->
+              <div class="swiper-button-prev"></div>
+              <div class="swiper-button-next"></div>
+              <!-- Pagination -->
+              <div class="swiper-pagination mt-3"></div>
+            </div>
+          </div>
+        </section>
+        
+          
+        <!-- /Events Section -->
+        <!-- Book A Table Section -->
+        <!-- Book A Table Section -->
+<section id="book-a-table" class="book-a-table section">
+  <div class="container section-title" data-aos="fade-up">
+    <h2>RESERVATION</h2>
+    <p>Book a Table</p>
+  </div>
+
+  <div class="container" data-aos="fade-up" data-aos-delay="100">
+    <form id="booking-form" class="php-email-form">
+      <div class="row gy-4">
+        <div class="col-lg-4 col-md-6">
+          <input type="text" class="form-control" id="name" placeholder="Your Name" required>
+        </div>
+        <div class="col-lg-4 col-md-6">
+          <input type="email" class="form-control" id="email" placeholder="Your Email" required>
+        </div>
+        <div class="col-lg-4 col-md-6">
+          <input type="text" class="form-control" id="phone" placeholder="Your Phone" required>
+        </div>
+        <div class="col-lg-4 col-md-6">
+          <input type="date" class="form-control" id="date" required>
+        </div>
+        <div class="col-lg-4 col-md-6">
+          <input type="time" class="form-control" id="time" required>
+        </div>
+        <div class="col-lg-4 col-md-6">
+          <input type="number" class="form-control" id="people" placeholder="# of people" required>
+        </div>
+      </div>
+
+      <div class="form-group mt-3">
+        <textarea class="form-control" id="message" rows="5" placeholder="Message (Optional)"></textarea>
+      </div>
+
+      <div class="text-center mt-3">
+        <div class="loading">Loading...</div>
+        <div class="error-message text-danger"></div>
+        <div class="sent-message text-success">Đặt bàn thành công! 🎉</div>
+        <button type="submit">Book a Table</button>
+      </div>
+    </form>
+  </div>
+</section>
+
+<script>
+  document.getElementById("booking-form").addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    const payload = {
+      ten: document.getElementById("name").value,
+      sdt: document.getElementById("phone").value,
+      email: document.getElementById("email").value,
+      ngayDat: document.getElementById("date").value,
+      gioDat: document.getElementById("time").value,
+      soNguoi: parseInt(document.getElementById("people").value),
+      ghiChu: document.getElementById("message").value
+    };
+
+    const loading = document.querySelector(".loading");
+    const success = document.querySelector(".sent-message");
+    const error = document.querySelector(".error-message");
+
+    loading.style.display = "block";
+    success.style.display = "none";
+    error.style.display = "none";
+
+    fetch("http://127.0.0.1:5000/api/datbanonline", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    })
+      .then(res => res.json())
+      .then(res => {
+        loading.style.display = "none";
+        if (res.message) {
+          success.style.display = "block";
+          document.getElementById("booking-form").reset();
+        } else {
+          error.textContent = res.error || "Lỗi không xác định!";
+          error.style.display = "block";
+        }
+      })
+      .catch(err => {
+        loading.style.display = "none";
+        error.textContent = "❌ Gửi dữ liệu thất bại.";
+        error.style.display = "block";
+        console.error(err);
+      });
+  });
+</script>
+<!-- /Book A Table Section -->
+        
+        <!-- Contact Section -->
+<section id="contact" class="contact section">
+    <!-- Section Title -->
+    <div class="container section-title" data-aos="fade-up">
+      <h2>Contact</h2>
+      <p>Contact Us</p>
+    </div><!-- End Section Title -->
+  
+    <div class="container" data-aos="fade-up" data-aos-delay="100">
+      <div class="row gy-4">
+        
+        <!-- Địa chỉ -->
+        <div class="col-lg-4">
+          <div class="info-item d-flex" data-aos="fade-up" data-aos-delay="300">
+            <i class="bi bi-geo-alt flex-shrink-0"></i>
+            <div>
+              <h3>Địa chỉ</h3>
+              <p>VietNam</p>
+            </div>
+          </div>
+        </div>
+  
+        <!-- Số điện thoại -->
+        <div class="col-lg-4">
+          <div class="info-item d-flex" data-aos="fade-up" data-aos-delay="400">
+            <i class="bi bi-telephone flex-shrink-0"></i>
+            <div>
+              <h3>Số điện thoại</h3>
+              <p>0123456789</p>
+            </div>
+          </div>
+        </div>
+  
+        <!-- Email -->
+        <div class="col-lg-4">
+          <div class="info-item d-flex" data-aos="fade-up" data-aos-delay="500">
+            <i class="bi bi-envelope flex-shrink-0"></i>
+            <div>
+              <h3>Email</h3>
+              <p>vinhv4818@gmail.com</p>
+            </div>
+          </div>
+        </div>
+  
+      </div>
+    </div>
+  </section><!-- End Contact Section -->
+
+    
+
+    <!-- Scroll Top -->
+    <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+
+    <!-- Preloader -->
+    <div id="preloader"></div>
+
+    <!-- Vendor JS Files -->
+    <script src="../assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="../assets/vendor/php-email-form/validate.js"></script>
+    <script src="../assets/vendor/aos/aos.js"></script>
+    <script src="../assets/vendor/glightbox/js/glightbox.min.js"></script>
+    <script src="../assets/vendor/imagesloaded/imagesloaded.pkgd.min.js"></script>
+    <script src="../assets/vendor/isotope-layout/isotope.pkgd.min.js"></script>
+    <script src="../assets/vendor/swiper/swiper-bundle.min.js"></script>
+
+    <!-- Main JS File -->
+    <script src="../assets/js/main.js"></script>
+
+</body>
+
+</html>
