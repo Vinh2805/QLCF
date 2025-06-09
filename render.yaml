@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: mangecoffe
+    env: python
+    buildCommand: ""
+    startCommand: "gunicorn run:app"
+    plan: free
+    runtime: python
+    region: singapore
