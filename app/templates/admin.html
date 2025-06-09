@@ -29,9 +29,9 @@
           font-weight: bold;
         }
       </style>
-    </head>
-    <body>
 </head>
+
+
 <body>
     <h1 class="text-center mb-4">Quản lý Quán Cà Phê</h1>
 
@@ -40,11 +40,16 @@
           <a class="nav-link active" data-bs-toggle="tab" href="#tabThucDon">Danh sách món</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" data-bs-toggle="tab" href="#tabDatBan">Danh sách đặt bàn</a>
+          <a class="nav-link" data-bs-toggle="tab" href="#tabDatBan">Quản lí bàn</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" data-bs-toggle="tab" href="#tabDonHang">Đơn đặt hàng</a>
         </li>
         <li class="nav-item">
           <a class="nav-link" data-bs-toggle="tab" href="#tabBieuDo">Các biểu đồ</a>
         </li>
+        
+
       </ul>
       
       
@@ -126,6 +131,7 @@
             </thead>
             <tbody></tbody>
           </table>
+          <div id="banTrongList" class="mt-4"></div>
         </div>
       
         <!-- Các biểu đồ -->
@@ -137,8 +143,61 @@
           <h3 class="mt-5">📊 Biểu đồ doanh thu theo năm</h3>
           <canvas id="chartNam" height="100"></canvas>
         </div>
+        <!-- Danh sách đơn đặt hàng online -->
+        <div class="tab-pane fade" id="tabDonHang">
+  <h3 class="mt-3">🛒 Danh sách đơn hàng chờ xác nhận</h3>
+  <table class="table table-bordered" id="donHangTable">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Người nhận</th>
+        <th>SĐT</th>
+        <th>Địa chỉ</th>
+        <th>Tổng tiền</th>
+        <th>Trạng thái</th>
+        <th>Hành động</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+
+
       </div>
-      
+              <!-- Modal tạo hóa đơn -->
+<div class="modal fade" id="modalHoaDon" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form id="formHoaDon">
+        <div class="modal-header">
+          <h5 class="modal-title">Tạo hóa đơn</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div id="khachMoiInfo" class="mb-3" style="display: none;">
+            <input class="form-control mb-2" id="tenKhachMoi" placeholder="Tên khách hàng">
+            <input class="form-control" id="sdtKhachMoi" placeholder="SĐT khách hàng">
+          </div>
+          <div id="dsMon"></div>
+          <div class="mb-3">
+            <label for="pttt" class="form-label">Phương thức thanh toán</label>
+            <select class="form-select" id="pttt" required>
+              <option value="Tiền mặt">Tiền mặt</option>
+              <option value="Chuyển khoản">Chuyển khoản</option>
+              <option value="VNPAY">VNPAY</option>
+            </select>
+          </div>
+
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-success" type="submit">Xác nhận</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
 
 
 <script>
@@ -259,7 +318,7 @@ function loadDatBan() {
             const tbody = document.querySelector('#datBanTable tbody');
             tbody.innerHTML = '';
 
-            data
+            data.datBan
                 .filter(item =>
                     item.id.toLowerCase().includes(searchId) &&
                     item.ban.toLowerCase().includes(searchBan) &&
@@ -276,9 +335,42 @@ function loadDatBan() {
                             <td>${item.tenKhach}</td>
                             <td>${item.ngay}</td>
                             <td>${item.gio}</td>
-                            <td>${item.trangThai}</td>
+                            <td>
+                              <span class="badge 
+                                ${item.trangThai === 'Đã đặt' ? 'bg-warning text-dark' : 
+                                  item.trangThai === 'Đã sử dụng' ? 'bg-success' :
+                                  item.trangThai === 'Đã hủy' ? 'bg-danger' : ''}">
+                                ${item.trangThai}
+                              </span>
+                            </td>
+                            <td>
+                              ${item.trangThai === "Đã đặt" ? `<button class="btn btn-success btn-sm" onclick="moModalHoaDon('${item.ban}', false)">Tạo hóa đơn</button>` : ""}
+                            </td>
+
+
                         </tr>`;
                 });
+            // 3. Hiển thị danh sách bàn trống
+            const banTrongContainer = document.getElementById("banTrongList");
+            banTrongContainer.innerHTML = "<h5>🪑 Các bàn đang trống:</h5>";
+
+            if (data.banTrong.length === 0) {
+                banTrongContainer.innerHTML += "<p class='text-muted'>Hiện không còn bàn nào trống.</p>";
+            } else {
+                const list = document.createElement("ul");
+                list.className = "list-group";
+                data.banTrong.forEach(ban => {
+                    const li = document.createElement("li");
+                    li.className = "list-group-item d-flex justify-content-between align-items-center";
+                    li.innerHTML = `
+                      <span>${ban.idBan} - ${ban.tenBan}</span>
+                      <button class="btn btn-sm btn-primary" onclick="moModalPhucVuKhach('${ban.idBan}')">Phục vụ khách mới</button>
+                    `;  
+                    list.appendChild(li);
+                    
+                });
+                banTrongContainer.appendChild(list);
+            }   
         })
         .catch(() => showAlert("error", "Quản lý Cà phê", "Không tải được danh sách đặt bàn!"));
 }
@@ -373,12 +465,116 @@ function loadThongKeDoanhThu() {
             console.error("❌ Không thể tải thống kê doanh thu:", err);
         });
 }
+let currentBan = "";
+let isKhachMoi = false;
 
+function moModalHoaDon(idBan, khachMoi = false) {
+  currentBan = idBan;
+  isKhachMoi = khachMoi;
+  document.getElementById("khachMoiInfo").style.display = khachMoi ? "block" : "none";
 
-loadDanhMucDropdown();
-loadThucDon();
-loadDatBan();
-loadThongKeDoanhThu();
+  // Load danh sách món
+  fetch("http://localhost:5000/api/thucdon")
+    .then(res => res.json())
+    .then(data => {
+      const dsMon = document.getElementById("dsMon");
+      dsMon.innerHTML = "";
+      data.forEach(mon => {
+        dsMon.innerHTML += `
+          <div class="input-group mb-2">
+            <span class="input-group-text">${mon.tenMon}</span>
+            <input type="number" class="form-control soLuongMon" data-id="${mon.idMon}" placeholder="Số lượng" min="0">
+          </div>`;
+      });
+    });
+
+  new bootstrap.Modal(document.getElementById("modalHoaDon")).show();
+}
+
+document.getElementById("formHoaDon").addEventListener("submit", function(e) {
+  e.preventDefault();
+
+  const danhSachMon = [];
+  document.querySelectorAll(".soLuongMon").forEach(input => {
+    const sl = parseInt(input.value);
+    if (sl > 0) {
+      danhSachMon.push({ idMon: input.dataset.id, soLuong: sl });
+    }
+  });
+
+  if (danhSachMon.length === 0) {
+    return Swal.fire("Lỗi", "Vui lòng chọn ít nhất 1 món!", "error");
+  }
+
+  const khachMoi = {
+    ten: document.getElementById("tenKhachMoi")?.value || "",
+    sdt: document.getElementById("sdtKhachMoi")?.value || ""
+  };
+
+  const duLieu = {
+    idBan: currentBan,
+    mon: danhSachMon,
+    isKhachMoi: isKhachMoi,
+    khachMoi: khachMoi,
+    phuongthucThanhToan: "Tiền mặt"
+  };
+
+  fetch("http://localhost:5000/api/taohoadon", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(duLieu)
+  })
+    .then(res => res.json())
+    .then(data => {
+      if (data.error) {
+        Swal.fire("Lỗi", data.error, "error");
+      } else {
+        Swal.fire("Thành công", data.message, "success").then(() => {
+          document.getElementById("formHoaDon").reset();
+          document.querySelector(".btn-close").click();
+          loadDatBan(); // reload danh sách bàn
+        });
+      }
+    })
+    .catch(err => {
+      Swal.fire("Lỗi", "Không thể kết nối server", "error");
+    });
+});
+function moModalPhucVuKhach(idBan) {
+  moModalHoaDon(idBan, true);
+}
+function loadDonHangChoDuyet() {
+  fetch("http://localhost:5000/api/donhang/cho_duyet")
+    .then(res => res.json())
+    .then(data => {
+      const tbody = document.querySelector("#donHangTable tbody");
+      tbody.innerHTML = "";
+      data.forEach(dh => {
+        tbody.innerHTML += `
+          <tr>
+            <td>${dh.idDonHang}</td>
+            <td>${dh.ten}</td>
+            <td>${dh.sdt}</td>
+            <td>${dh.diaChi}</td>
+            <td>${dh.tongTien} VNĐ</td>
+            <td><span class="badge bg-warning text-dark">${dh.trangThai}</span></td>
+            <td><button class="btn btn-success btn-sm" onclick="duyetDon('${dh.idDonHang}')">Duyệt</button></td>
+          </tr>`;
+      });
+    });
+}
+
+function duyetDon(id) {
+  fetch(`http://localhost:5000/api/duyet_donhang/${id}`, {
+    method: "PUT"
+  })
+    .then(res => res.json())
+    .then(data => {
+      Swal.fire("Thành công", data.message, "success");
+      loadDonHangChoDuyet();
+    });
+}
+
 
 </script>
 
@@ -391,14 +587,19 @@ loadThongKeDoanhThu();
                 const tabId = event.target.getAttribute('href');
     
                 if (tabId === "#tabThucDon") {
+                    loadDanhMucDropdown();
                     loadThucDon();
                 } else if (tabId === "#tabDatBan") {
                     loadDatBan();
                 } else if (tabId === "#tabBieuDo") {
                     loadThongKeDoanhThu();
+                }else if (tabId === "#tabDonHang") {
+                    loadDonHangChoDuyet(); 
                 }
             });
         });
+        loadDanhMucDropdown();  
+        loadThucDon();
     });
     </script>
     

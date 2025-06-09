@@ -45,7 +45,7 @@
         <div class="branding d-flex align-items-center">
 
             <div class="container position-relative d-flex align-items-center justify-content-between">
-                <a href="login.html" class="btn btn-outline-light me-3 d-none d-xl-block">Đăng nhập với tư cách admin</a>
+                <a href="login.html" class="btn btn-outline-light me-3 d-none d-xl-block" id="login-btn">Đăng nhập</a>
 
                 <a href="index.html" class="logo d-flex align-items-center me-auto me-xl-0">
                     <!-- Uncomment the line below if you also wish to use an image logo -->
@@ -64,6 +64,10 @@
                 </nav>
 
                 <a class="btn-book-a-table d-none d-xl-block" href="#book-a-table">Book a Table</a>
+                <a href="giohang.html" class="btn btn-outline-warning me-2" id="cart-link">
+                  <i class="bi bi-cart3"></i> Giỏ hàng
+                </a>
+
 
             </div>
 
@@ -76,7 +80,7 @@
         <!-- Hero Section -->
         <section id="hero" class="hero section dark-background">
 
-            <img src="../assets/img/hero-bg.jpg" alt="" data-aos="fade-in">
+            <img src="../assets/img/avt.jpg" alt="" data-aos="fade-in">
 
             <div class="container">
                 <div class="row">
@@ -94,42 +98,7 @@
 
         </section><!-- /Hero Section -->
         <!-- Menu Section with API -->
-        <style>
-          .menu-item {
-            border-radius: 16px;
-            overflow: hidden;
-            transition: transform 0.3s ease;
-            background-color: #fff;
-          }
         
-          .menu-item:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-          }
-        
-          .menu-item img {
-            height: 220px;
-            object-fit: cover;
-          }
-        
-          .menu-item .card-body {
-            padding: 1rem;
-          }
-        
-          .menu-item h5 {
-            font-weight: 600;
-            color: #4e342e; /* coffee tone */
-          }
-        
-          .menu-item .card-text {
-            font-size: 0.95rem;
-            color: #6c757d;
-          }
-        
-          .menu-item .fw-bold {
-            color: #795548;
-          }
-        </style>
         
   <section id="menu" class="menu section">
     <div class="container section-title" data-aos="fade-up">
@@ -145,28 +114,62 @@
   <!-- Script to fetch API -->
   <script>
     document.addEventListener("DOMContentLoaded", () => {
-  fetch("http://localhost:5000/api/thucdon")
-    .then(res => res.json())
-    .then(data => {
-      const container = document.getElementById("menu-container");
-      container.innerHTML = "";
-      data.forEach(item => {
-        const col = document.createElement("div");
-        col.className = "col-lg-4 col-md-6 mb-4 d-flex align-items-stretch";
-        col.innerHTML = `
-          <div class="menu-item card shadow">
-            <img src="assets/imageAnhDaiDienQuanLiCF/${item.AnhDaiDien}" class="card-img-top img-fluid" alt="${item.tenMon}">
-            <div class="card-body d-flex flex-column">
-              <h5 class="card-title text-center">${item.tenMon}</h5>
-              <p class="card-text">${item.GioiThieuMon || 'Không có mô tả.'}</p>
-              <div class="mt-auto text-center">
-                <p class="fw-bold">Giá: ${item.giaBan.toLocaleString()} VNĐ</p>
+      fetch("http://localhost:5000/api/thucdon")
+        .then(res => res.json())
+        .then(data => {
+          const container = document.getElementById("menu-container");
+          container.innerHTML = "";
+          data.forEach(item => {
+            const col = document.createElement("div");
+            col.className = "col-lg-4 col-md-6 mb-4 d-flex align-items-stretch";
+            col.innerHTML = `
+              <div class="menu-item card shadow">
+                <img src="assets/imageAnhDaiDienQuanLiCF/${item.AnhDaiDien}" class="card-img-top img-fluid" alt="${item.tenMon}">
+                <div class="card-body d-flex flex-column">
+                  <h5 class="card-title text-center">${item.tenMon}</h5>
+                  <p class="card-text">${item.GioiThieuMon || 'Không có mô tả.'}</p>
+                  <div class="mt-auto d-flex justify-content-between align-items-center px-2">
+                    <span class="fw-bold text-nowrap">Giá: ${item.giaBan.toLocaleString()} VNĐ</span>
+                    <button class="btn btn-sm btn-outline-primary add-to-cart-btn"
+                      data-id="${item.idMon}" 
+                      data-ten="${item.tenMon}" 
+                      data-gia="${item.giaBan}" 
+                      title="Thêm vào giỏ hàng">
+                      <i class="bi bi-cart-plus"></i>
+                    </button>
+                  </div>
+
+                </div>
               </div>
-            </div>
-          </div>
-        `;
-        container.appendChild(col);
-      });
+            `;
+            container.appendChild(col);
+          });
+          document.querySelectorAll(".add-to-cart-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const userId = localStorage.getItem("userId");
+      if (!userId) {
+        alert("⚠️ Vui lòng đăng nhập để thêm vào giỏ hàng!");
+        window.location.href = "login.html";
+        return;
+      }
+
+      const id = btn.dataset.id;
+      const ten = btn.dataset.ten;
+      const gia = parseFloat(btn.dataset.gia);
+
+      let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+      const existing = cart.find(item => item.id === id);
+      if (existing) {
+        existing.soLuong += 1;
+      } else {
+        cart.push({ id, ten, gia, soLuong: 1 });
+      }
+
+      localStorage.setItem("cart", JSON.stringify(cart));
+      alert(`✅ Đã thêm "${ten}" vào giỏ hàng!`);
+    });
+  });
     })
     .catch(err => {
       console.error("Lỗi khi lấy dữ liệu:", err);
@@ -226,7 +229,19 @@
 
 });
 
-    </script>
+
+</script>
+    <!-- Thêm đoạn kiểm tra truy cập giỏ hàng -->
+<script>
+  document.getElementById("cart-link").addEventListener("click", function (e) {
+    if (!localStorage.getItem("userId")) {
+      e.preventDefault();
+      alert("⚠️ Bạn cần đăng nhập để vào giỏ hàng!");
+      window.location.href = "login.html";
+    }
+  });
+</script>
+
     
     
        
@@ -353,6 +368,31 @@
       });
   });
 </script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const loginBtn = document.getElementById("login-btn");
+    const userId = localStorage.getItem("userId");
+
+    if (userId) {
+      // ✅ Nếu đã đăng nhập → đổi thành nút Đăng xuất
+      loginBtn.textContent = "Đăng xuất";
+      loginBtn.href = "#"; // Không chuyển trang
+      loginBtn.classList.remove("btn-outline-light");
+      loginBtn.classList.add("btn-danger");
+
+      loginBtn.addEventListener("click", function (e) {
+        e.preventDefault();
+        if (confirm("Bạn có chắc chắn muốn đăng xuất không?")) {
+          localStorage.removeItem("userId");
+          localStorage.removeItem("role");
+          window.location.reload();
+        }
+      });
+    }
+  });
+</script>
+
 <!-- /Book A Table Section -->
         
         <!-- Contact Section -->

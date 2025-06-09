@@ -2,13 +2,13 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <title>Đăng nhập Admin</title>
+  <title>Đăng nhập</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
 </head>
 <body class="bg-light d-flex align-items-center justify-content-center" style="height: 100vh;">
 
   <div class="card shadow p-4" style="width: 360px;">
-    <h3 class="text-center mb-4">Đăng nhập Admin</h3>
+    <h3 class="text-center mb-4">Đăng nhập</h3>
     <form id="login-form">
       <div class="mb-3">
         <label for="username" class="form-label">Tài khoản</label>
@@ -20,6 +20,11 @@
       </div>
       <button type="submit" class="btn btn-primary w-100">Đăng nhập</button>
       <p id="error" class="text-danger mt-2 text-center" style="display:none;"></p>
+      <div class="text-center mt-3">
+  <span>Chưa có tài khoản?</span>
+  <a href="dangky.html" class="text-decoration-none ms-1">Đăng ký</a>
+</div>
+
     </form>
   </div>
 
@@ -37,7 +42,16 @@
       .then(res => res.json())
       .then(data => {
         if (data.success) {
-          window.location.href = "admin.html";  // chuyển sang trang quản trị
+          localStorage.setItem("userId", data.userId);
+          localStorage.setItem("role", data.role);
+          localStorage.setItem("ten", data.ten);         // 👈 Lưu tên người dùng
+          localStorage.setItem("sdt", data.sdt);         // 👈 Lưu sđt người dùng
+
+          if (data.role === "admin") {
+            window.location.href = "admin.html";
+          } else {
+            window.location.href = "index.html";
+          }
         } else {
           document.getElementById("error").textContent = data.message;
           document.getElementById("error").style.display = "block";

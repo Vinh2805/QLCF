@@ -1713,10 +1713,57 @@ section,
 .contact .php-email-form button[type=submit]:hover {
   background: var(--accent-color);
 }
+.menu-item {
+            border-radius: 16px;
+  overflow: hidden;
+  transition: transform 0.3s ease;
+  background-color: #fff;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+          }
+        
+          .menu-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+          }
+        
+          .menu-item img {
+            height: 200px;        /* 👈 Cố định chiều cao ảnh */
+  object-fit: cover;
+  width: 100%;
+          }
+        
+          .menu-item .card-body {
+            flex: 1; /* 👈 Tự giãn phần thân chiếm phần còn lại */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; 
+          }
+        
+          .menu-item h5 {
+            font-weight: 600;
+            color: #4e342e; /* coffee tone */
+          }
+        
+          .menu-item .card-text {
+            font-size: 0.95rem;
+            color: #6c757d;
+          }
+        
+          .menu-item .fw-bold {
+            color: #795548;
+          }
+          .menu-item img {
+  height: 200px;        /* 👈 Cố định chiều cao ảnh */
+  object-fit: cover;
+  width: 100%;
+}
 
 /*--------------------------------------------------------------
 # Starter Section Section
 --------------------------------------------------------------*/
 .starter-section {
-  /* Add your styles here */
+  background-color: color-mix(in srgb, var(--background-color) 90%, white 5%);
+  padding: 60px 0;
 }

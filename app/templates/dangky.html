@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Đăng ký tài khoản</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body class="bg-light d-flex align-items-center justify-content-center" style="height: 100vh;">
+
+  <div class="card shadow p-4" style="width: 400px;">
+    <h3 class="text-center mb-4">Đăng ký tài khoản</h3>
+    <form id="register-form">
+      <div class="mb-3">
+        <label for="hoTen" class="form-label">Họ và tên</label>
+        <input type="text" id="hoTen" class="form-control" required>
+      </div>
+      <div class="mb-3">
+        <label for="username" class="form-label">Tên đăng nhập</label>
+        <input type="text" id="username" class="form-control" required>
+      </div>
+      <div class="mb-3">
+        <label for="password" class="form-label">Mật khẩu</label>
+        <input type="password" id="password" class="form-control" required>
+      </div>
+      <div class="mb-3">
+        <label for="sdt" class="form-label">Số điện thoại</label>
+        <input type="tel" id="sdt" class="form-control" required>
+      </div>
+      <button type="submit" class="btn btn-success w-100">Đăng ký</button>
+      <p id="error" class="text-danger mt-2 text-center" style="display:none;"></p>
+      <div class="text-center mt-3">
+        <a href="login.html" class="text-decoration-none">Quay lại đăng nhập</a>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    document.getElementById("register-form").addEventListener("submit", function (e) {
+      e.preventDefault();
+      const data = {
+        hoTen: document.getElementById("hoTen").value,
+        username: document.getElementById("username").value,
+        password: document.getElementById("password").value,
+        sdt: document.getElementById("sdt").value
+      };
+
+      fetch("http://localhost:5000/api/dangky", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          alert("🎉 Đăng ký thành công! Mời bạn đăng nhập.");
+          window.location.href = "login.html";
+        } else {
+          document.getElementById("error").textContent = data.message;
+          document.getElementById("error").style.display = "block";
+        }
+      })
+      .catch(() => {
+        document.getElementById("error").textContent = "Không thể kết nối đến server.";
+        document.getElementById("error").style.display = "block";
+      });
+    });
+  </script>
+
+</body>
+</html>

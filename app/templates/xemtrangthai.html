@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Trạng thái đơn hàng</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+<div class="container py-5">
+  <h2 class="mb-4"><i class="bi bi-box"></i> Trạng thái đơn hàng của bạn</h2>
+  <div id="status-message" class="text-danger"></div>
+  <div id="donhang-container"></div>
+</div>
+
+<script>
+const userId = localStorage.getItem("userId");
+if (!userId) {
+  document.getElementById("status-message").innerText = "⚠️ Bạn chưa đăng nhập.";
+} else {
+  fetch(`http://localhost:5000/api/donhang_user/${userId}`)
+    .then(res => res.json())
+    .then(data => {
+      if (!data || data.length === 0) {
+        document.getElementById("donhang-container").innerHTML = "<p class='text-muted'>Không có đơn hàng nào.</p>";
+        return;
+      }
+
+      let html = `
+        <table class="table table-bordered">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Người nhận</th>
+              <th>Địa chỉ</th>
+              <th>Tổng tiền</th>
+              <th>Phí ship</th>
+              <th>Trạng thái</th>
+              <th>Thao tác</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+
+      data.forEach(don => {
+        const huyDuoc = don.trangThai === "Chờ xác nhận";
+        const xacNhanDuoc = don.trangThai === "Đã xác nhận";
+        html += `
+          <tr>
+            <td>${don.idDonHang}</td>
+            <td>${don.ten}</td>
+            <td>${don.diaChi}</td>
+            <td>${Number(don.tongTien).toLocaleString()} VNĐ</td>
+            <td>${Number(don.phiShip).toLocaleString()} VNĐ</td>
+            <td>${don.trangThai}</td>
+            <td>
+              ${huyDuoc 
+                ? `<button class="btn btn-sm btn-danger" onclick="huyDon(${don.idDonHang})">Hủy</button>` 
+                : xacNhanDuoc
+                  ? `<button class="btn btn-sm btn-success" onclick="xacNhanNhanHang(${don.idDonHang})">Đã nhận được hàng</button>`
+                  : `<span class="text-muted">Không thể hủy</span>`}
+            </td>
+
+          </tr>
+        `;
+      });
+
+      html += "</tbody></table>";
+      document.getElementById("donhang-container").innerHTML = html;
+    })
+    .catch(err => {
+      console.error(err);
+      document.getElementById("status-message").innerText = "Không thể tải đơn hàng.";
+    });
+}
+
+function huyDon(id) {
+  if (!confirm("Bạn có chắc chắn muốn hủy đơn hàng này?")) return;
+
+  fetch(`http://localhost:5000/api/huy_donhang/${id}`, {
+    method: "PUT"
+  })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        alert("✅ Đơn hàng đã được hủy.");
+        location.reload();
+      } else {
+        alert("❌ " + data.message);
+      }
+    })
+    .catch(err => {
+      alert("❌ Lỗi kết nối khi hủy đơn hàng.");
+      console.error(err);
+    });
+}
+function xacNhanNhanHang(idDonHang) {
+  if (!confirm("Bạn đã nhận được hàng?")) return;
+
+  fetch(`http://localhost:5000/api/nhan_hang/${idDonHang}`, {
+    method: "PUT"
+  })
+    .then(res => res.json())
+    .then(data => {
+      alert("✅ " + data.message);
+      location.reload();
+    })
+    .catch(err => {
+      alert("❌ Lỗi khi xác nhận đã nhận hàng.");
+      console.error(err);
+    });
+}
+
+</script>
+</body>
+</html>

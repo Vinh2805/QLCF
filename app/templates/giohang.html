@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Giỏ hàng</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet">
+  <link href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.7.2/mapbox-gl-geocoder.css" rel="stylesheet" />
+  <style>#map { height: 400px; border-radius: 8px; margin-top: 10px; }</style>
+</head>
+<body class="bg-light">
+<div class="container py-5">
+  <h2 class="mb-4">🛒 Giỏ hàng của bạn</h2>
+  <div class="mb-3 text-end">
+  <a href="xemtrangthai.html" class="btn btn-outline-info">
+    📋 Xem trạng thái đơn hàng
+  </a>
+</div>
+
+  <div id="cart-container"></div>
+
+  <hr>
+  <h4>Thông tin giao hàng</h4>
+  <form id="checkout-form">
+    <div class="mb-3">
+      <input type="text" class="form-control" id="ten" placeholder="Họ tên người nhận" required>
+    </div>
+    <div class="mb-3">
+      <input type="tel" class="form-control" id="sdt" placeholder="Số điện thoại" required>
+    </div>
+    <div id="geocoder" class="mb-3"></div>
+    
+
+    <div id="map"></div>
+    <p class="mt-2">
+      📏 Khoảng cách: <span id="distance">-</span> km<br>
+      🕐 Ước tính thời gian giao: <span id="duration">-</span> phút<br>
+      🚚 Phí giao hàng: <span id="fee">-</span> VNĐ
+    </p>
+    <div class="mb-3">
+  <label class="form-label">Phương thức thanh toán</label><br>
+  <div class="form-check form-check-inline">
+    <input class="form-check-input" type="radio" name="payment" id="cash" value="cash" checked>
+    <label class="form-check-label" for="cash">Tiền mặt khi nhận</label>
+  </div>
+  <div class="form-check form-check-inline">
+    <input class="form-check-input" type="radio" name="payment" id="vnpay" value="vnpay">
+    <label class="form-check-label" for="vnpay">Chuyển khoản (VietQR)</label>
+  </div>
+    <button type="submit" class="btn btn-primary">Xác nhận đơn hàng</button>
+  </div>
+
+  </form>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
+<script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.7.2/mapbox-gl-geocoder.min.js"></script>
+<script>
+
+
+const cart = JSON.parse(localStorage.getItem("cart")) || [];
+const container = document.getElementById("cart-container");
+// 🧠 Tự động điền họ tên và SĐT nếu đã đăng nhập
+const hoTen = localStorage.getItem("ten");
+const sdt = localStorage.getItem("sdt");
+
+if (hoTen) document.getElementById("ten").value = hoTen;
+if (sdt) document.getElementById("sdt").value = sdt;
+
+function renderCart() {
+  const container = document.getElementById("cart-container");
+  if (cart.length === 0) {
+    container.innerHTML = "<p class='text-muted'>Giỏ hàng đang trống.</p>";
+    return;
+  }
+
+  let html = `<table class="table table-bordered">
+    <thead><tr>
+      <th>Sản phẩm</th>
+      <th>Giá</th>
+      <th>Số lượng</th>
+      <th>Thành tiền</th>
+      <th></th>
+    </tr></thead><tbody>`;
+
+  let tongTien = 0;
+  cart.forEach((item, index) => {
+    const thanhTien = item.soLuong * item.gia;
+    tongTien += thanhTien;
+    html += `<tr>
+      <td>${item.ten}</td>
+      <td>${item.gia.toLocaleString()} VNĐ</td>
+      <td>
+        <input type="number" min="1" class="form-control form-control-sm" 
+          value="${item.soLuong}" onchange="updateQuantity(${index}, this.value)">
+      </td>
+      <td>${thanhTien.toLocaleString()} VNĐ</td>
+      <td><button class="btn btn-sm btn-danger" onclick="removeItem(${index})">Xóa</button></td>
+    </tr>`;
+  });
+
+  html += `</tbody></table>
+    <h5>Tổng cộng: <strong>${tongTien.toLocaleString()} VNĐ</strong></h5>`;
+
+  container.innerHTML = html;
+}
+
+function updateQuantity(index, newQty) {
+  newQty = parseInt(newQty);
+  if (newQty < 1) return;
+
+  cart[index].soLuong = newQty;
+  localStorage.setItem("cart", JSON.stringify(cart));
+  renderCart(); // Cập nhật lại giao diện thay vì reload
+}
+
+function removeItem(index) {
+  cart.splice(index, 1);
+  localStorage.setItem("cart", JSON.stringify(cart));
+  renderCart();
+}
+
+// Gọi render ban đầu
+renderCart();
+
+let isVNPaid = false;
+document.getElementById("checkout-form").addEventListener("submit", function(e) {
+  e.preventDefault();
+  
+  const phiShip = Number(document.getElementById("fee")?.textContent?.replace(/[^\d]/g, "")) || 0;
+  const diaChi = document.querySelector("#geocoder input")?.value || '';
+  const paymentMethod = document.querySelector('input[name="payment"]:checked').value;
+  const totalAmount = cart.reduce((sum, item) => sum + item.soLuong * item.gia, 0) + phiShip;
+
+  const donHang = {
+    ten: document.getElementById("ten").value,
+    sdt: document.getElementById("sdt").value,
+    diaChi: diaChi,
+    phiShip: phiShip,
+    gioHang: cart,
+    thanhToan: paymentMethod,
+    idAccount: localStorage.getItem("userId")  // 👈 gửi idAccount
+
+  };
+
+  // Nếu là thanh toán qua VNPAY và chưa thanh toán
+  if (paymentMethod === "vnpay" && !isVNPaid) {
+    const qrUrl = `https://api.vietqr.io/image/970441-0335757499-t5b8xuk.jpg?accountName=DINH%20VAN%20VINH&amount=${totalAmount}`;
+
+    const popup = window.open("", "QR", "width=400,height=500");
+    popup.document.write(`
+      <h3>📲 Vui lòng quét mã QR để thanh toán</h3>
+      <img src="${qrUrl}" style="width:100%">
+      <p style="margin-top:10px;">Sau khi thanh toán xong, hãy quay lại và bấm <strong>Xác nhận đơn hàng</strong> lần nữa.</p>
+    `);
+
+    isVNPaid = true;
+    return; // Dừng tại đây chờ xác nhận lại
+  }
+
+
+
+  fetch("http://127.0.0.1:5000/api/donhang", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(donHang)
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        alert("✅ Đơn hàng đã được gửi thành công!");
+        localStorage.removeItem("cart");
+        location.reload();
+      } else {
+        alert("❌ Gửi đơn hàng thất bại: " + data.message);
+      }
+    })
+    .catch(err => {
+      alert("❌ Lỗi kết nối đến server!");
+      console.error(err);
+    });
+});
+
+mapboxgl.accessToken = 'pk.eyJ1IjoidmluaDI4MDUwNCIsImEiOiJjbWJpNzdlN3AwMnhjMmxzOGZmb283am55In0.UQ-jAZ6QZP9JjCeSx1rk-Q';
+const storeLocation = [105.854444, 21.028511];
+const map = new mapboxgl.Map({
+  container: 'map',
+  style: 'mapbox://styles/mapbox/streets-v11',
+  center: storeLocation,
+  zoom: 12
+});
+
+new mapboxgl.Marker({ color: 'green' })
+  .setLngLat(storeLocation)
+  .setPopup(new mapboxgl.Popup().setText("Cửa hàng CoffeeShop"))
+  .addTo(map);
+
+let userMarker = null;
+
+const geocoder = new MapboxGeocoder({
+  accessToken: mapboxgl.accessToken,
+  mapboxgl: mapboxgl,
+  placeholder: "Nhập địa chỉ hoặc chọn trên bản đồ",
+  marker: false
+});
+
+document.getElementById("geocoder").appendChild(geocoder.onAdd(map));
+
+function handleCustomerLocation(customerLocation) {
+  if (userMarker) userMarker.remove();
+  userMarker = new mapboxgl.Marker({ color: 'red' })
+    .setLngLat(customerLocation)
+    .setPopup(new mapboxgl.Popup().setText("Vị trí của bạn"))
+    .addTo(map);
+
+  fetch(`https://api.mapbox.com/directions/v5/mapbox/driving/${storeLocation.join(',')};${customerLocation.join(',')}?access_token=${mapboxgl.accessToken}`)
+    .then(res => res.json())
+    .then(data => {
+      const route = data.routes[0];
+      const km = (route.distance / 1000).toFixed(2);
+      const minutes = Math.round(route.duration / 60);
+      const fee = Math.ceil(km * 2000);
+
+      document.getElementById("distance").textContent = km;
+      document.getElementById("duration").textContent = minutes;
+      document.getElementById("fee").textContent = fee.toLocaleString();
+    });
+}
+
+map.on('click', (e) => {
+  const customerLocation = [e.lngLat.lng, e.lngLat.lat];
+  handleCustomerLocation(customerLocation);
+
+  // 👉 Gọi reverse geocoding để lấy địa chỉ
+  fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${customerLocation[0]},${customerLocation[1]}.json?access_token=${mapboxgl.accessToken}`)
+    .then(res => res.json())
+    .then(data => {
+      const placeName = data.features[0]?.place_name || "";
+      const geocoderInput = document.querySelector("#geocoder input");
+        if (geocoderInput) {
+           geocoderInput.value = placeName;
+        }
+
+    });
+});
+
+
+geocoder.on('result', (e) => {
+  const customerLocation = e.result.center;
+  handleCustomerLocation(customerLocation);
+});
+</script>
+</body>
+</html>
