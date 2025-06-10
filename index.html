@@ -114,7 +114,7 @@
   <!-- Script to fetch API -->
   <script>
     document.addEventListener("DOMContentLoaded", () => {
-      fetch("http://localhost:5000/api/thucdon")
+      fetch("https://be-qlcf.onrender.com/api/thucdon")
         .then(res => res.json())
         .then(data => {
           const container = document.getElementById("menu-container");
@@ -177,7 +177,7 @@
     });
 
   // Khuyến mãi 
-  fetch("http://localhost:5000/api/khuyenmai")
+  fetch("https://be-qlcf.onrender.com/api/khuyenmai")
   .then(res => res.json())
   .then(data => {
     const wrapper = document.getElementById("km-list");

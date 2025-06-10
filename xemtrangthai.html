@@ -17,7 +17,7 @@ const userId = localStorage.getItem("userId");
 if (!userId) {
   document.getElementById("status-message").innerText = "⚠️ Bạn chưa đăng nhập.";
 } else {
-  fetch(`http://localhost:5000/api/donhang_user/${userId}`)
+  fetch(`https://be-qlcf.onrender.com/api/donhang_user/${userId}`)
     .then(res => res.json())
     .then(data => {
       if (!data || data.length === 0) {
@@ -76,7 +76,7 @@ if (!userId) {
 function huyDon(id) {
   if (!confirm("Bạn có chắc chắn muốn hủy đơn hàng này?")) return;
 
-  fetch(`http://localhost:5000/api/huy_donhang/${id}`, {
+  fetch(`https://be-qlcf.onrender.com/api/huy_donhang/${id}`, {
     method: "PUT"
   })
     .then(res => res.json())
@@ -96,7 +96,7 @@ function huyDon(id) {
 function xacNhanNhanHang(idDonHang) {
   if (!confirm("Bạn đã nhận được hàng?")) return;
 
-  fetch(`http://localhost:5000/api/nhan_hang/${idDonHang}`, {
+  fetch(`https://be-qlcf.onrender.com/api/nhan_hang/${idDonHang}`, {
     method: "PUT"
   })
     .then(res => res.json())

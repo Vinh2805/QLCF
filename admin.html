@@ -207,7 +207,7 @@ function showAlert(type, title, text) {
 }
 
 function loadDanhMucDropdown() {
-    fetch('http://localhost:5000/api/danhmuc')
+    fetch('https://be-qlcf.onrender.com/api/danhmuc')
         .then(res => res.json())
         .then(data => {
             const select = document.getElementById('idDanhMuc');
@@ -220,7 +220,7 @@ function loadDanhMucDropdown() {
 }
 
 function loadThucDon() {
-    fetch('http://localhost:5000/api/thucdon_full')
+    fetch('https://be-qlcf.onrender.com/api/thucdon_full')
         .then(res => res.json())
         .then(data => {
             const tbody = document.querySelector('#thucDonTable tbody');
@@ -262,7 +262,7 @@ function attachRowEvents() {
                     tenDanhMuc: cells[3].textContent.trim(),
                     gioiThieuMon: cells[4].textContent.trim()
                 };
-                fetch('http://localhost:5000/api/suamon', {
+                fetch('https://be-qlcf.onrender.com/api/suamon', {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(mon)
@@ -292,7 +292,7 @@ function attachRowEvents() {
                 cancelButtonText: 'Hủy'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    fetch(`http://localhost:5000/api/xoamon/${idMon}`, { method: 'DELETE' })
+                    fetch(`https://be-qlcf.onrender.com/api/xoamon/${idMon}`, { method: 'DELETE' })
                         .then(res => res.json())
                         .then(data => {
                             showAlert("success", "Quản lý Cà phê", data.message || data.error);
@@ -305,7 +305,7 @@ function attachRowEvents() {
 }
 
 function loadDatBan() {
-    fetch('http://localhost:5000/api/datban')
+    fetch('https://be-qlcf.onrender.com/api/datban')
         .then(res => res.json())
         .then(data => {
             const searchId = document.getElementById("searchId").value.toLowerCase();
@@ -385,7 +385,7 @@ document.getElementById("formAddMon").addEventListener("submit", function (e) {
         idDanhMuc: document.getElementById("idDanhMuc").value,
         gioiThieuMon: document.getElementById("gioiThieuMon").value
     };
-    fetch('http://localhost:5000/api/themmon', {
+    fetch('https://be-qlcf.onrender.com/api/themmon', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(mon)
@@ -405,7 +405,7 @@ document.getElementById("formAddMon").addEventListener("submit", function (e) {
 let chartThang, chartQuy, chartNam;
 
 function loadThongKeDoanhThu() {
-    fetch("http://localhost:5000/api/thongke/doanhthu")
+    fetch("https://be-qlcf.onrender.com/api/thongke/doanhthu")
         .then(res => res.json())
         .then(data => {
             // Hủy biểu đồ cũ nếu có
@@ -474,7 +474,7 @@ function moModalHoaDon(idBan, khachMoi = false) {
   document.getElementById("khachMoiInfo").style.display = khachMoi ? "block" : "none";
 
   // Load danh sách món
-  fetch("http://localhost:5000/api/thucdon")
+  fetch("https://be-qlcf.onrender.com/api/thucdon")
     .then(res => res.json())
     .then(data => {
       const dsMon = document.getElementById("dsMon");
@@ -519,7 +519,7 @@ document.getElementById("formHoaDon").addEventListener("submit", function(e) {
     phuongthucThanhToan: "Tiền mặt"
   };
 
-  fetch("http://localhost:5000/api/taohoadon", {
+  fetch("https://be-qlcf.onrender.com/api/taohoadon", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(duLieu)
@@ -544,7 +544,7 @@ function moModalPhucVuKhach(idBan) {
   moModalHoaDon(idBan, true);
 }
 function loadDonHangChoDuyet() {
-  fetch("http://localhost:5000/api/donhang/cho_duyet")
+  fetch("https://be-qlcf.onrender.com/api/donhang/cho_duyet")
     .then(res => res.json())
     .then(data => {
       const tbody = document.querySelector("#donHangTable tbody");
@@ -565,7 +565,7 @@ function loadDonHangChoDuyet() {
 }
 
 function duyetDon(id) {
-  fetch(`http://localhost:5000/api/duyet_donhang/${id}`, {
+  fetch(`https://be-qlcf.onrender.com/api/duyet_donhang/${id}`, {
     method: "PUT"
   })
     .then(res => res.json())

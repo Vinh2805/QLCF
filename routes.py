@@ -3,7 +3,6 @@ from flask_cors import CORS
 import pyodbc
 import datetime
 from datetime import time, date,datetime,timedelta
-from dateutil import parser
 
 app = Flask(__name__)
 CORS(app)
