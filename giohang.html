@@ -147,7 +147,7 @@ document.getElementById("checkout-form").addEventListener("submit", function(e) 
 
   // Nếu là thanh toán qua VNPAY và chưa thanh toán
   if (paymentMethod === "vnpay" && !isVNPaid) {
-    const qrUrl = `https://api.vietqr.io/image/970441-0335757499-t5b8xuk.jpg?accountName=DINH%20VAN%20VINH&amount=${totalAmount}`;
+    const qrUrl = `https://api.vietqr.io/image/970441-335757499-t5b8xuk.jpg?accountName=DINH%20VAN%20VINH&amount=${totalAmount}`;
 
     const popup = window.open("", "QR", "width=400,height=500");
     popup.document.write(`
